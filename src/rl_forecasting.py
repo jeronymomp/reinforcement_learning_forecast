@@ -308,17 +308,17 @@ def generate_Xt(number_ts,mu,sigma1,T,list_of_Xt,n_obs):
 # =============================================================================
 def mean_squared_dataframe(data_frame_error,start_obs):
     """
-    Calcula o erro quadrático médio acumulado (MSE) para um dataframe de erros a partir de uma observação específica.
+    Calculates the cumulative mean squared error (MSE) for a dataframe of errors starting from a specific observation.
 
-    A função toma um dataframe de erros e, a partir de uma observação especificada, calcula o erro ao quadrado, 
-    em seguida, a soma acumulada desses valores. O resultado é então dividido pelo índice + 1 para obter o MSE acumulado.
+    The function takes a dataframe of errors and, starting from a specified observation, computes the absolute values of the errors,
+    then calculates the cumulative sum of these values. The result is then divided by the index + 1 to obtain the cumulative MAE.
 
     Args:
-        data_frame_error (pd.DataFrame): DataFrame contendo os erros de previsão.
-        start_obs (int): Índice da observação inicial a partir da qual o cálculo será realizado.
+        data_frame_error (pd.DataFrame): DataFrame containing the prediction errors.
+        start_obs (int): Index of the starting observation from which the calculation will be performed.
 
     Returns:
-        pd.DataFrame: DataFrame com o erro quadrático médio acumulado (MSE) a partir da observação especificada.
+        pd.DataFrame: DataFrame with the cumulative mean absolute error (MAE) starting from the specified observation.
     """
     df_test = data_frame_error.iloc[(start_obs):,:]
     df_squared = df_test ** 2
@@ -326,6 +326,30 @@ def mean_squared_dataframe(data_frame_error,start_obs):
     data_frame_mse = df_cumulutive.div(df_cumulutive.index + 1, axis=0)
     
     return data_frame_mse
+
+# =============================================================================
+# Function 9
+# =============================================================================
+def mean_absolute_dataframe(data_frame_error, start_obs):
+    """
+    Calculates the cumulative mean absolute error (MAE) for a dataframe of errors starting from a specific observation.
+
+    The function takes a dataframe of errors and, starting from a specified observation, computes the absolute values of the errors,
+    then calculates the cumulative sum of these values. The result is then divided by the index + 1 to obtain the cumulative MAE.
+
+    Args:
+        data_frame_error (pd.DataFrame): DataFrame containing the prediction errors.
+        start_obs (int): Index of the starting observation from which the calculation will be performed.
+
+    Returns:
+        pd.DataFrame: DataFrame with the cumulative mean absolute error (MAE) starting from the specified observation.
+    """
+    df_test = data_frame_error.iloc[start_obs:, :]
+    df_absolute = df_test.abs()
+    df_cumulative = df_absolute.cumsum().reset_index(drop=True)
+    data_frame_mae = df_cumulative.div(df_cumulative.index + 1, axis=0)
+    
+    return data_frame_mae
 
 
 # =============================================================================

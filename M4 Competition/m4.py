@@ -120,35 +120,37 @@ id_competitors = id_competitors.apply(lambda x: '{0:0>3}'.format(x))
     #i = id_competitors[j]
     #patoolib.extract_archive('Point Forecasts\submission-'+ i + '.rar', outdir="Point Forecasts")
 
-# Get a specific series data
-for hour in range(1,414):
-    sim_data = test_data.loc['H'+str(hour)].values
-    
-    # Create DataFrame with Values
-    data_frame = pd.DataFrame()
-    data_frame['sim_data'] = sim_data
-    
-    # Final DataFrame
-    for j in range(len(id_competitors)):
-        i = id_competitors[j]
-        submission_data = pd.read_csv('Point Forecasts/submission-' + i + '.csv',index_col=0)
-        forecast = submission_data.loc['H'+str(hour)].values
-        data_frame['forc_' + i] = forecast[0:48]
-       
-    data_frame['mean_avg'] = data_frame.iloc[:,1:].mean(axis=1)  
+# Carregar todos os arquivos CSV de uma vez fora do loop
+competitor_forecasts = {}
+for i in id_competitors:
+    submission_data = pd.read_csv(f'Point Forecasts/submission-{i}.csv', index_col=0)
+    competitor_forecasts[i] = submission_data
 
-    # Create Error Dataframe
-    data_frame_error = pd.DataFrame()
+# Loop principal
+for hour in range(1, 414):
+    sim_data = test_data.loc['H' + str(hour)].values
+    
+    # Criar DataFrame inicial com sim_data
+    data_frame = pd.DataFrame({'sim_data': sim_data})
+
+    # Adicionar previsões de todos os competidores
+    for i in id_competitors:
+        forecast = competitor_forecasts[i].loc['H' + str(hour)].values[:48]
+        data_frame[f'forc_{i}'] = forecast
+
+    # Calcular a média das previsões
+    data_frame['mean_avg'] = data_frame.iloc[:, 1:].mean(axis=1)
+
+    # Criar DataFrame de erros usando vetorização
+    data_frame_error = data_frame.iloc[:, 1:].sub(data_frame['sim_data'], axis=0)
+    data_frame_error.columns = [f'{col}_error' for col in data_frame_error.columns]
+
+    # Calcular o MSE de forma vetorizada
+    data_frame_mse = mean_absolute_dataframe(data_frame_error, (0))
     
     # Methods
     list_of_methods = data_frame.columns
     list_of_methods = list_of_methods[1:]
-    
-    for i in list_of_methods:
-        data_frame_error[str(i) + '_error'] = data_frame['sim_data'] - data_frame[str(i)]
-        
-    # MSE Dataframe
-    data_frame_mse = mean_absolute_dataframe(data_frame_error,(0)) 
 
 # =============================================================================
 # 4 - State Definition
@@ -237,18 +239,38 @@ for hour in range(1,414):
 # =============================================================================
 # 9 - Checking results
 # =============================================================================
-result_df_lst_media = [df.set_index(df.columns[0])[df.columns[1]] for df in result_df_lst_mse]
+result_df_lst_mse = [df.set_index(df.columns[0])[df.columns[1]] for df in result_df_lst_mse]
+result_df_lst_mae = [df.set_index(df.columns[0])[df.columns[1]] for df in result_df_lst_mae]
 
+# Df mse raking
 rank_list = []
 
-for rank in range(0,len(result_df_lst_media)):
-    ranking = pd.DataFrame(result_df_lst_media[rank].rank(ascending=True))
+for rank in range(0,len(result_df_lst_mse)):
+    ranking = pd.DataFrame(result_df_lst_mse[rank].rank(ascending=True))
     rank_list.append(ranking)
     
 # Concatenar os DataFrames ao longo do eixo das colunas
 df_concatenado = pd.concat(rank_list)
 
 # Agrupar pelos índices e calcular a média
-df_media = df_concatenado.groupby(df_concatenado.index).mean()
+df_mse_rank = df_concatenado.groupby(df_concatenado.index).mean()
+
+
+# Df mse raking
+rank_list = []
+
+for rank in range(0,len(result_df_lst_mae)):
+    ranking = pd.DataFrame(result_df_lst_mae[rank].rank(ascending=True))
+    rank_list.append(ranking)
+    
+# Concatenar os DataFrames ao longo do eixo das colunas
+df_concatenado = pd.concat(rank_list)
+
+# Agrupar pelos índices e calcular a média
+df_mae_rank = df_concatenado.groupby(df_concatenado.index).mean()
+
+# To csv
+df_mae_rank.to_excel('mae.xlsx')
+df_mse_rank.to_excel('mse.xlsx')
 
 # =============================================================================

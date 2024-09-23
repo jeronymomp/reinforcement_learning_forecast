@@ -12,6 +12,7 @@ This is the code for the Experiment number 1 of the pdf "Proposed SImulation Exp
 import os
 import sys
 import time
+import datetime
 import warnings
 import itertools
 import statistics
@@ -20,6 +21,7 @@ import pandas as pd
 import random as rand
 from itertools import repeat
 from numpy.linalg import norm
+from datetime import datetime
 from sklearn.decomposition import PCA  
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity
@@ -209,7 +211,7 @@ mse_lst.append(mse_row)
 
 result_df_mse = pd.DataFrame(mse_lst, columns=['Method', 'Value'])
 
-hour = datetime.now().strftime('%H-%M-%S')
+hour = datetime.now().strftime('%H-%M-%S-%f')
 file_name = f"mse_{hour}.txt"
 result_df_mse.to_csv(file_name, sep='\t', index=False)
 
@@ -227,8 +229,7 @@ mae_row = ('reinforce', mae_rl)
 mae_lst.append(mae_row)
 
 result_df_mae = pd.DataFrame(mae_lst, columns=['Method', 'Value'])
-
-hour = datetime.now().strftime('%H-%M-%S')
+hour = datetime.now().strftime('%H-%M-%S-%f')
 file_name = f"mae_{hour}.txt"
 result_df_mae.to_csv(file_name, sep='\t', index=False)
 

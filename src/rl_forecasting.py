@@ -34,7 +34,6 @@ import numpy as np
 import pandas as pd
 import random as rand
 from numpy.linalg import norm
-import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA  
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity

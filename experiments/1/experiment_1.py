@@ -20,7 +20,6 @@ import pandas as pd
 import random as rand
 from itertools import repeat
 from numpy.linalg import norm
-import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA  
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics.pairwise import cosine_similarity
@@ -90,14 +89,14 @@ result_df_mse_lst = []
 # =============================================================================
 # 3 - Built-in Functions
 # =============================================================================
-os.chdir(package_path)
+sys.path.append(package_path)
 from rl_forecasting import series_rolling_window_list,training_series_for_pca,cosine_similarity_q_table,generate_Xt
 from rl_forecasting import q_learning_state_selection,q_learning_method_selection,q_learning_table_update,mean_squared_dataframe,mean_absolute_dataframe
 
 # =============================================================================
 # 3 - Generate Many Monthly Simulated Series
 # ============================================================================= 
-os.chdir(result_path)
+sys.path.append(result_path)
 # Start list
 list_of_Xt = []
 list_of_Yt = []

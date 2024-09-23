@@ -80,7 +80,8 @@ rl_data_frame = pd.DataFrame(np.nan, index=range(n_obs + T), columns=range(2))
 rl_data_frame.columns = ['forecast','error']
 
 # 2.15 - Path
-package_path = 'C:/Git/Git Privado/reinforcement_learning_forecast/src'
+package_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/src'
+result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/1'
 
 # Result_list
 result_df_mae_lst = []
@@ -96,6 +97,7 @@ from rl_forecasting import q_learning_state_selection,q_learning_method_selectio
 # =============================================================================
 # 3 - Generate Many Monthly Simulated Series
 # ============================================================================= 
+os.chdir(result_path)
 # Start list
 list_of_Xt = []
 list_of_Yt = []
@@ -208,6 +210,10 @@ mse_lst.append(mse_row)
 
 result_df_mse = pd.DataFrame(mse_lst, columns=['Method', 'Value'])
 
+hour = datetime.now().strftime('%H-%M-%S')
+file_name = f"mse_{hour}.txt"
+result_df_mse.to_csv(file_name, sep='\t', index=False)
+
 # Calculate all MAE
 mae_lst = []
 data_frame_test = data_frame.iloc[(train_sample+100):,:]
@@ -222,5 +228,9 @@ mae_row = ('reinforce', mae_rl)
 mae_lst.append(mae_row)
 
 result_df_mae = pd.DataFrame(mae_lst, columns=['Method', 'Value'])
+
+hour = datetime.now().strftime('%H-%M-%S')
+file_name = f"mae_{hour}.txt"
+result_df_mae.to_csv(file_name, sep='\t', index=False)
 
 # =============================================================================

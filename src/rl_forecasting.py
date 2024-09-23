@@ -351,6 +351,41 @@ def mean_absolute_dataframe(data_frame_error, start_obs):
     
     return data_frame_mae
 
+# =============================================================================
+# Function 10 - Optional
+# =============================================================================
+def q_learning_state_selection_2(q_table, sim_list, max_value, idx_max_value, min_similarity):
+    """
+    Selects a state from the Q-table based on cosine similarity, with an option to blend states if similarity is too low.
+
+    Args:
+        q_table (list): A list of tuples where each tuple contains an action and an embedding vector.
+        sim_list (list): A list of cosine similarities between the current embedding and those in the Q-table.
+        max_value (float): The maximum cosine similarity found.
+        idx_max_value (int): The index of the Q-table entry with the maximum cosine similarity.
+        min_similarity (float): The threshold for minimum acceptable similarity.
+
+    Returns:
+        list: A list containing a single tuple with the selected or blended state.
+    """
+    if max_value[0] < min_similarity:
+        # Blending states when max similarity is below the threshold
+        total_sum = sum(sim_list)
+        if total_sum == 0:
+            return [(0, 0)]  # Handle case where all similarities are zero
+        normalized_lst = [sim / total_sum for sim in sim_list]
+
+        series = [action for action, _ in q_table]
+        embeddings = [embedding for _, embedding in q_table]
+
+        mean_series = sum(w * v for w, v in zip(normalized_lst, series))
+        mean_embedding = sum(w * v for w, v in zip(normalized_lst, embeddings))
+        
+        return [(mean_series, mean_embedding)]
+    
+    # Select the state with the highest similarity
+    return [(q_table[idx_max_value][0], q_table[idx_max_value][1])]
+
 
 # =============================================================================
 # =============================================================================

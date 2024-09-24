@@ -7,7 +7,7 @@ import pandas as pd
 # =============================================================================
 # Parameters
 # =============================================================================
-diretorio = "C:\\Git\\Git Privado\\reinforcement_learning_forecast\\experiments\\1"
+diretorio = "/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/1"
 
 # =============================================================================
 # Functions
@@ -26,6 +26,7 @@ def read_error_frame(error_type,diretorio, delimitador='\t'):
 # =============================================================================
 # Read Content
 # =============================================================================
+sys.path.append(diretorio)
 lista_mae = read_error_frame("mae",diretorio)
 lista_mse = read_error_frame("mse",diretorio)
 
@@ -44,3 +45,7 @@ avg_mae = sum_mae / len(lista_mae)
 # MSE
 sum_mse = sum(lista_mse)
 avg_mse = sum_mse / len(lista_mse)
+
+# Export Results
+avg_mae.to_excel('avg_mae.xlsx', index=False)
+avg_mse.to_excel('avg_mse.xlsx', index=False)

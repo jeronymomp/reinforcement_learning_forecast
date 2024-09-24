@@ -2,7 +2,7 @@
 """
 Deep Reinforcement Learning Forecast Paper
 
-This is the code for the Experiment number 2 of the pdf "Proposed SImulation Experiment"
+This is the code for the Experiment number 8 of the pdf "Proposed SImulation Experiment"
 """
 
 # =============================================================================
@@ -82,7 +82,7 @@ rl_data_frame.columns = ['forecast','error']
 
 # 2.15 - Path
 package_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/src'
-result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/1'
+result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/8'
 
 # Result_list
 result_df_mae_lst = []
@@ -99,32 +99,55 @@ from rl_forecasting import q_learning_state_selection,q_learning_method_selectio
 # 3 - Generate Many Monthly Simulated Series
 # ============================================================================= 
 sys.path.append(result_path)
+
 # Start list
 list_of_Xt = []
+list_of_Xt_1 = []
+list_of_Xt_2 = []
 list_of_Yt = []
 
-# Generate base series
-Xt = np.random.normal(mu1, sigma1, (n_obs + T, 1))
-list_of_Xt.append(Xt)
-Yt = Xt + np.random.normal(mu2, sigma2, (n_obs + T, 1))
-list_of_Yt.append(Yt)
+# Random Number of Series to be Combinated
+n_series_ensamble = rand.randint(2,number_ts)
 
-# Generate weak alternatives (assumindo que a função generate_Xt é eficiente)
-list_of_Xt = generate_Xt(number_ts, mu1, sigma1, T, list_of_Xt, n_obs)
+# Series that generates Yt
+# Weak Alternatives
+list_of_Xt_1 = generate_Xt(n_series_ensamble,mu1,sigma1,T,list_of_Xt_1,n_obs)
+# X
+X = np.column_stack(list_of_Xt_1)
+# Y
+Yt = np.mean(list_of_Xt_1,axis=0)
+list_of_Yt.append(Yt) 
+# Regression
+reg_Y = LinearRegression().fit(X[0:T], Yt[0:T])
+Y_base = reg_Y.predict(X[(T+1):])  
+list_of_Xt_1.append(Y_base)
 
-# Time Series Forecasting Base Models
+# Other Series
+list_of_Xt_2 = generate_Xt(number_ts-n_series_ensamble,mu1,sigma1,T,list_of_Xt_2,n_obs)
+
+# List of Dataframes of results
 benchmark_forecast = []
 
-# Fit linear regression models for each time series in parallel (via numpy for speed)
-X_train = list_of_Xt[0][:T]
-Y_train = list_of_Yt[0][:T]
+# Included the Strong Model
+for i in range(len(list_of_Xt_1)-1):
+    reg_1 = LinearRegression().fit(list_of_Xt_1[i][0:T], list_of_Yt[0][0:T])
+    y_pred_1 = reg_1.predict(list_of_Xt_1[i][(T+1):])
+    benchmark_forecast.append(y_pred_1)
 
-reg = LinearRegression().fit(X_train, Y_train)
-y_pred = [reg.predict(X[(T+1):]) for X in list_of_Xt]
-benchmark_forecast = np.array(y_pred)
+# Not Included the Strong Model
+for i in range(len(list_of_Xt_2)):
+    reg_2 = LinearRegression().fit(list_of_Xt_2[i][0:T], list_of_Yt[0][0:T])
+    y_pred_2 = reg_2.predict(list_of_Xt_2[i][(T+1):])
+    benchmark_forecast.append(y_pred_2)
 
-# Mean average of forecasts
-forec_mean_avg = np.mean(benchmark_forecast, axis=0)
+# Append Last Regression Results
+benchmark_forecast.append(Y_base)
+
+# Mean Average of Forecasts
+forec_mean_avg = np.mean(benchmark_forecast,axis=0)
+
+# Combine the two lists of X
+list_of_Xt = list_of_Xt_1 + list_of_Xt_2
 
 # DataFrame of Results
 data_frame = pd.DataFrame(list_of_Yt[0], columns=['sim_data'])
@@ -136,7 +159,6 @@ zeros = np.zeros(train_sample + 1)
 forecast_array = np.concatenate([np.append(zeros, forecast)[:, None] for forecast in benchmark_forecast], axis=1)
 forecast_df = pd.DataFrame(forecast_array, columns=[f'forc_{i}' for i in range(len(list_of_Xt))])
 data_frame = pd.concat([data_frame, forecast_df], axis=1)
-data_frame = data_frame.drop('forc_0', axis=1)
 
 # Add mean forecast
 data_frame['avg_forc'] = np.append(zeros, forec_mean_avg)

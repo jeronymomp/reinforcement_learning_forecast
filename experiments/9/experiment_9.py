@@ -2,7 +2,7 @@
 """
 Deep Reinforcement Learning Forecast Paper
 
-This is the code for the Experiment number 2 of the pdf "Proposed SImulation Experiment"
+This is the code for the Experiment number 5 of the pdf "Proposed SImulation Experiment"
 """
 
 # =============================================================================
@@ -82,17 +82,31 @@ rl_data_frame.columns = ['forecast','error']
 
 # 2.15 - Path
 package_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/src'
-result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/1'
+result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/9'
 
 # Result_list
 result_df_mae_lst = []
 result_df_mse_lst = []
 
+# Coeffient and Intercept Range
+start_coefficient_interval = 0
+end_coefficient_interval = 1
+
+# Parameters for Normal Distribution
+mu1, sigma1 = 0, 1
+
+# Starting Time
+start_time = time.time()
+
+# Sample size of each Ts series
+dgp_sample_size_1 = 1500
+dgp_sample_size_2 = 1600
+
 # =============================================================================
 # 3 - Built-in Functions
 # =============================================================================
 sys.path.append(package_path)
-from rl_forecasting import series_rolling_window_list,training_series_for_pca,cosine_similarity_q_table,generate_Xt
+from rl_forecasting import series_rolling_window_list,training_series_for_pca,cosine_similarity_q_table,generate_Xt,breakthru
 from rl_forecasting import q_learning_state_selection,q_learning_method_selection,q_learning_table_update,mean_squared_dataframe,mean_absolute_dataframe
 
 # =============================================================================
@@ -100,34 +114,53 @@ from rl_forecasting import q_learning_state_selection,q_learning_method_selectio
 # ============================================================================= 
 sys.path.append(result_path)
 # Start list
+# DGP to be simulated - AR and MA coefficients
+coef1 = rand.uniform(0,1)
+coef2 = rand.uniform(0,1)
+
+# Autoregressive
+# Weak Models
 list_of_Xt = []
+for i in range(0,(number_ts-1)):
+# Generate Series based on random numbers
+    coef_rnd = rand.uniform(0,1)
+    dgp_list_rnd = [[[coef_rnd], [1]]]
+    ts_series = breakthru(dgp_list_rnd, [n_obs + T], initial_date)
+    ts_series.set_index("time",inplace = True)
+    list_of_Xt.append(ts_series)
+
+# Strong Models
+# First Model
+Xt_str_1 = breakthru([[[coef1], [1]]],[n_obs + T],initial_date)
+Xt_str_1.set_index("time",inplace = True)
+list_of_Xt.append(Xt_str_1)
+
+# Second Model
+Xt_str_2 = breakthru([[[coef2], [1]]],[n_obs + T],initial_date)
+Xt_str_2.set_index("time",inplace = True)
+list_of_Xt.append(Xt_str_2)
+
+# Generate series
+# Base Series
 list_of_Yt = []
+Yt = pd.concat([Xt_str_1[0:dgp_sample_size_1],Xt_str_2[dgp_sample_size_1:dgp_sample_size_1+dgp_sample_size_2]])
+list_of_Yt.append(Yt) 
 
-# Generate base series
-Xt = np.random.normal(mu1, sigma1, (n_obs + T, 1))
-list_of_Xt.append(Xt)
-Yt = Xt + np.random.normal(mu2, sigma2, (n_obs + T, 1))
-list_of_Yt.append(Yt)
-
-# Generate weak alternatives (assumindo que a função generate_Xt é eficiente)
-list_of_Xt = generate_Xt(number_ts, mu1, sigma1, T, list_of_Xt, n_obs)
-
-# Time Series Forecasting Base Models
+# List of Dataframes of results
 benchmark_forecast = []
 
-# Fit linear regression models for each time series in parallel (via numpy for speed)
-X_train = list_of_Xt[0][:T]
-Y_train = list_of_Yt[0][:T]
+# Included the Strong Model
+for i in range(len(list_of_Xt)):
+    reg = LinearRegression().fit(list_of_Xt[i][0:T], list_of_Yt[0][0:T])
+    y_pred = reg.predict(list_of_Xt[i][(T+1):])
+    benchmark_forecast.append(y_pred)
 
-reg = LinearRegression().fit(X_train, Y_train)
-y_pred = [reg.predict(X[(T+1):]) for X in list_of_Xt]
-benchmark_forecast = np.array(y_pred)
-
-# Mean average of forecasts
-forec_mean_avg = np.mean(benchmark_forecast, axis=0)
+# Mean Average of Forecasts
+forec_mean_avg = np.mean(benchmark_forecast,axis=0)
 
 # DataFrame of Results
 data_frame = pd.DataFrame(list_of_Yt[0], columns=['sim_data'])
+data_frame = data_frame.reset_index(drop=True)
 
 # Numpy array of zeros (no loop needed for initialization)
 zeros = np.zeros(train_sample + 1)
@@ -135,8 +168,8 @@ zeros = np.zeros(train_sample + 1)
 # Add benchmark columns efficiently
 forecast_array = np.concatenate([np.append(zeros, forecast)[:, None] for forecast in benchmark_forecast], axis=1)
 forecast_df = pd.DataFrame(forecast_array, columns=[f'forc_{i}' for i in range(len(list_of_Xt))])
+forecast_df = forecast_df.reset_index(drop=True)
 data_frame = pd.concat([data_frame, forecast_df], axis=1)
-data_frame = data_frame.drop('forc_0', axis=1)
 
 # Add mean forecast
 data_frame['avg_forc'] = np.append(zeros, forec_mean_avg)

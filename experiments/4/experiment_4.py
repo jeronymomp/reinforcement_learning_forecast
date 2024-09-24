@@ -2,7 +2,7 @@
 """
 Deep Reinforcement Learning Forecast Paper
 
-This is the code for the Experiment number 2 of the pdf "Proposed SImulation Experiment"
+This is the code for the Experiment number 4 of the pdf "Proposed SImulation Experiment"
 """
 
 # =============================================================================
@@ -82,7 +82,7 @@ rl_data_frame.columns = ['forecast','error']
 
 # 2.15 - Path
 package_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/src'
-result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/1'
+result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/4'
 
 # Result_list
 result_df_mae_lst = []
@@ -104,6 +104,11 @@ list_of_Xt = []
 list_of_Yt = []
 
 # Generate base series
+#Factor Model
+Ft = np.array(np.random.normal(mu1, sigma1, (n_obs + T))).reshape((-1, 1))
+
+# Generate series
+# Base Series
 Xt = np.random.normal(mu1, sigma1, (n_obs + T, 1))
 list_of_Xt.append(Xt)
 Yt = Xt + np.random.normal(mu2, sigma2, (n_obs + T, 1))

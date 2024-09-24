@@ -2,7 +2,7 @@
 """
 Deep Reinforcement Learning Forecast Paper
 
-This is the code for the Experiment number 2 of the pdf "Proposed SImulation Experiment"
+This is the code for the Experiment number 5 of the pdf "Proposed SImulation Experiment"
 """
 
 # =============================================================================
@@ -82,17 +82,27 @@ rl_data_frame.columns = ['forecast','error']
 
 # 2.15 - Path
 package_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/src'
-result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/1'
+result_path = '/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/5'
 
 # Result_list
 result_df_mae_lst = []
 result_df_mse_lst = []
 
+# Coeffient and Intercept Range
+start_coefficient_interval = 0
+end_coefficient_interval = 1
+
+# Parameters for Normal Distribution
+mu1, sigma1 = 0, 1
+
+# Starting Time
+start_time = time.time()
+
 # =============================================================================
 # 3 - Built-in Functions
 # =============================================================================
 sys.path.append(package_path)
-from rl_forecasting import series_rolling_window_list,training_series_for_pca,cosine_similarity_q_table,generate_Xt
+from rl_forecasting import series_rolling_window_list,training_series_for_pca,cosine_similarity_q_table,generate_Xt,breakthru
 from rl_forecasting import q_learning_state_selection,q_learning_method_selection,q_learning_table_update,mean_squared_dataframe,mean_absolute_dataframe
 
 # =============================================================================
@@ -100,17 +110,23 @@ from rl_forecasting import q_learning_state_selection,q_learning_method_selectio
 # ============================================================================= 
 sys.path.append(result_path)
 # Start list
+# DGP to be simulated - AR and MA coefficients
+coef = rand.uniform(0,1)
+dgp_list = [[[coef], [1]]]
+
+# Autoregressive
 list_of_Xt = []
+for i in range(0,(number_ts+1)):
+# Generate Series based on those numbers
+    ts_series = breakthru(dgp_list, [n_obs + T], initial_date)
+    ts_series.set_index("time",inplace = True)
+    list_of_Xt.append(ts_series)
+
+# Generate series
+# Base Series
 list_of_Yt = []
-
-# Generate base series
-Xt = np.random.normal(mu1, sigma1, (n_obs + T, 1))
-list_of_Xt.append(Xt)
-Yt = Xt + np.random.normal(mu2, sigma2, (n_obs + T, 1))
-list_of_Yt.append(Yt)
-
-# Generate weak alternatives (assumindo que a função generate_Xt é eficiente)
-list_of_Xt = generate_Xt(number_ts, mu1, sigma1, T, list_of_Xt, n_obs)
+Yt =  list_of_Xt[0] + np.array(np.random.normal(mu1, sigma1, (n_obs + T))).reshape((-1, 1))
+list_of_Yt.append(Yt) 
 
 # Time Series Forecasting Base Models
 benchmark_forecast = []
@@ -128,6 +144,7 @@ forec_mean_avg = np.mean(benchmark_forecast, axis=0)
 
 # DataFrame of Results
 data_frame = pd.DataFrame(list_of_Yt[0], columns=['sim_data'])
+data_frame = data_frame.reset_index(drop=True)
 
 # Numpy array of zeros (no loop needed for initialization)
 zeros = np.zeros(train_sample + 1)
@@ -135,8 +152,8 @@ zeros = np.zeros(train_sample + 1)
 # Add benchmark columns efficiently
 forecast_array = np.concatenate([np.append(zeros, forecast)[:, None] for forecast in benchmark_forecast], axis=1)
 forecast_df = pd.DataFrame(forecast_array, columns=[f'forc_{i}' for i in range(len(list_of_Xt))])
+forecast_df = forecast_df.reset_index(drop=True)
 data_frame = pd.concat([data_frame, forecast_df], axis=1)
-data_frame = data_frame.drop('forc_0', axis=1)
 
 # Add mean forecast
 data_frame['avg_forc'] = np.append(zeros, forec_mean_avg)

@@ -22,6 +22,8 @@ generate_Xt: generate a list of values to simulation.
 
 mean_squared_dataframe: genarate dataframe with MSE.
 
+breakthru: generate random ARMA series.
+
 """
 
 # =============================================================================
@@ -36,6 +38,7 @@ import random as rand
 from numpy.linalg import norm
 from sklearn.decomposition import PCA  
 from sklearn.linear_model import LinearRegression
+from statsmodels.tsa.arima_process import ArmaProcess
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
@@ -384,6 +387,44 @@ def q_learning_state_selection_2(q_table, sim_list, max_value, idx_max_value, mi
     
     # Select the state with the highest similarity
     return [(q_table[idx_max_value][0], q_table[idx_max_value][1])]
+
+# =============================================================================
+# Function 11
+# =============================================================================
+def breakthru(dgp_list,dgp_sample_size,initial_date):
+    """
+    Function that generates a time series with multiple DGPs.
+    This function creates a series based on AR, MA or ARMA models.
+    This enable us to simulate series with differente behaviours, such as:
+        - Structural Breaks
+        - Kondratiev Waves
+        - AMong others.
+        
+    Args:
+        dgp_list (list): list with ARMA coefficients:
+            list = [[ar,ma],[ar2,ma2]] 
+            Example: [[[1, 0.5], [1]], [[1, -0.5], [1]]].
+            This is a series with two different ARMA process:
+                yt = yt-1 + 0.5yt-2 + et
+                yt = yt-1 - 0.5yt-2 + et
+        dgp_sample_size (list): size of each of those DGP process.
+        initial_date (str): Date of the start of the time series.
+
+    Returns:
+        simulated_series (Series): Pandas series with the entire simulated series.
+
+    """
+    simulated_series = []
+    n_breaks = len(dgp_list)
+    for i in range(0,len(dgp_list)):
+        AR_object = ArmaProcess(dgp_list[i-1][0],dgp_list[i][1])
+        simulated_data = AR_object.generate_sample(nsample=dgp_sample_size[i]).tolist()
+        simulated_series.extend(simulated_data)
+        ts_series =  pd.DataFrame(simulated_series)
+        time = pd.date_range(start=initial_date, periods=(sum(dgp_sample_size)), freq='M')
+    ts_series['time'] = time
+    ts_series.columns = ['sim_data','time']
+    return ts_series
 
 
 # =============================================================================

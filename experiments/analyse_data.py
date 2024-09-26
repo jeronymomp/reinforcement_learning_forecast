@@ -2,12 +2,13 @@
 # Packages
 # =============================================================================
 import os
+import sys
 import pandas as pd
 
 # =============================================================================
 # Parameters
 # =============================================================================
-diretorio = "/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/1"
+diretorio = "/data/keeling/a/jeronymo/reinforcement_learning_forecast/experiments/9"
 
 # =============================================================================
 # Functions
@@ -47,5 +48,5 @@ sum_mse = sum(lista_mse)
 avg_mse = sum_mse / len(lista_mse)
 
 # Export Results
-avg_mae.to_excel('avg_mae.xlsx', index=False)
-avg_mse.to_excel('avg_mse.xlsx', index=False)
+avg_mae.to_excel('avg_mae_experiment_9.xlsx', index=False)
+avg_mse.to_excel('avg_mse_experiment_9.xlsx', index=False)

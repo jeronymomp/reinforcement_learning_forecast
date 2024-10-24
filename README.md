@@ -1,8 +1,41 @@
 # Reinforcement Learning for Forecasting
 
-This package suite simplifies the implementation of Reinforcement Learning (RL) models specifically designed for forecasting tasks. Reinforcement Learning is a powerful paradigm that enables agents to learn optimal strategies through interactions with their environment. In the context of forecasting, this approach allows models to adaptively select and refine their forecasting methods based on the observed performance and changing dynamics of time series data.
+The **Reinforcement Learning for Forecasting** package provides a comprehensive suite for implementing Reinforcement Learning (RL) models tailored specifically for forecasting tasks. Reinforcement Learning is a dynamic and powerful approach where agents learn to make optimal decisions by interacting with their environment. This methodology is particularly beneficial in forecasting, where it allows models to adaptively select, refine, and optimize their forecasting techniques based on observed performance and the evolving characteristics of time series data.
 
-## Overview
+This package incorporates various methods explored in the research paper titled *"Reinforcement Learning: A New Paradigm for the Forecasting Combination Puzzle."* Through rigorous experimentation, we aim to demonstrate the effectiveness of RL in addressing complex forecasting challenges.
+
+The package is organized into four main sections, each focusing on different aspects of our methodology and experimentation:
+
+## M4
+
+This section encompasses all the methods utilized during our experiments to evaluate the performance of our RL-based forecasting approach against established benchmarks from the M4 competition. The M4 competition is a widely recognized forecasting challenge that provides a rich dataset and a variety of forecasting methods. By comparing our RL methods with those employed in the M4 competition, we aim to assess the strengths and weaknesses of our approach in a competitive context. 
+
+### Key Features:
+- Detailed implementation of RL algorithms for time series forecasting.
+- Benchmarks against M4 competition methods to validate performance.
+- Comprehensive performance metrics for evaluating accuracy and reliability.
+
+## SopF
+
+In this section, we present all the methods implemented during our experiments to compare our RL-based forecasting strategy against the Survey of Professional Forecasters (SopF) methods. The SopF provides insights into how professional forecasters approach their predictions, and understanding these methods is crucial for assessing the practical applicability of our RL approach in real-world scenarios.
+
+### Key Features:
+- Implementation of various SopF forecasting methods as benchmarks.
+- Performance evaluation to determine the effectiveness of RL against professional forecasting practices.
+- Insights into how RL can enhance forecasting accuracy compared to traditional methods.
+
+## Experiments
+
+This section outlines all methods used during our experiments to test our RL approach against the proposed experimental setups. We detail our experimental design, including the datasets, evaluation criteria, and comparative methodologies employed in our analysis. This provides a clear framework for understanding the robustness of our findings and the potential implications of using RL in forecasting applications.
+
+### Key Features:
+- Comprehensive description of the experimental methodology.
+- Evaluation of RL performance in diverse forecasting scenarios.
+- Analysis of results to highlight the advantages and limitations of the proposed methods.
+
+Through these sections, we aim to provide a thorough understanding of how Reinforcement Learning can be leveraged for effective forecasting, demonstrating its potential to revolutionize traditional forecasting practices.
+
+## src - methods to apply RL in forecasting
 
 The **Reinforcement Learning for Forecasting** package offers tools and methodologies to implement RL techniques in time series forecasting. It includes components for building agents, creating simulated training environments, and provides auxiliary tools for data processing and performance evaluation. The main goal of this package is to empower data scientists and researchers to leverage RL in improving forecasting accuracy and robustness.
 

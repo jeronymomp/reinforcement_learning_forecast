@@ -48,16 +48,6 @@ Key features of this package include:
 - **Time Series Generation**: Create synthetic ARMA series for simulation and testing purposes.
 - **Performance Metrics**: Calculate Mean Squared Error (MSE) and provide comprehensive error evaluations to assess model performance.
 
-## Installation
-
-To install this package, you can use pip:
-
-```bash
-pip install your-package-name
-```
-
-Replace `your-package-name` with the actual name of your package.
-
 ## Usage
 
 Here's a brief overview of the main functions included in the package:
